@@ -3,12 +3,30 @@ function generateThumbnailUrl(file) {
   return file.thumbnailLink;
 };
 
+function getAlternateLink(file) {
+  if (file.alternateLink) {
+    return '<a href="' + file.alternateLink + '"><span class="alt-link">alternate</span></a>';
+  } else {
+    return '';
+  }
+};
+
+function getWebContentLink(file) {
+  if (file.webContentLink) {
+    return '<a href="' + file.webContentLink + '"><span class="content-link">web content</span></a>';
+  } else {
+    return '';
+  }
+};
+
 function generateFileTile(file) {
   return '<div class="file-tile" id="' + file.id + '"> ' +
     '<a href="https://drive.google.com/open?id=' + file.id +
     '" target="_blank">' +
     '<img src="' + generateThumbnailUrl(file) + '"><br/>' +
     '<span class="file-name">' + file.title + '</span></a>' +
+    getAlternateLink(file) +
+    getWebContentLink(file) +
     '</div>';
 };
 
