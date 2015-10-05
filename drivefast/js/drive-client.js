@@ -8,23 +8,23 @@ function generateFileTile(file) {
     '<a href="https://drive.google.com/open?id=' + file.id +
     '" target="_blank">' +
     '<img src="' + generateThumbnailUrl(file) + '"><br/>' +
-    '<span class="file-name">' + file.name + '</span></a>' +
+    '<span class="file-name">' + file.title + '</span></a>' +
     '</div>';
 };
 
 function loadFiles(parentId) {
   var request = gapi.client.drive.files.list({
     'q': "'" + parentId + "' in parents",
-    'fields': 'files(id,name,mimeType,viewedByMeTime,modifiedByMeTime,thumbnailLink)'
+    'fields': 'items(id,title,mimeType,lastViewedByMeDate,modifiedByMeDate,thumbnailLink,webContentLink,defaultOpenWithLink,alternateLink)'
   });
   request.execute(function(response) {
-    if (response.files) {
-      if (response.files.length == 0) {
+    if (response.items) {
+      if (response.items.length == 0) {
 	$('#status').html('No items returned');
       }
       $('#file-grid').html('');
-      for (var i = 0; i < response.files.length; i++) {
-	$('#file-grid').append(generateFileTile(response.files[i]));
+      for (var i = 0; i < response.items.length; i++) {
+	$('#file-grid').append(generateFileTile(response.items[i]));
       }
     } else {
       $('#log').append('<p>Failed to list files</p>');
@@ -33,7 +33,7 @@ function loadFiles(parentId) {
 };
 
 function loadApi() {
-  gapi.client.load("drive", "v3", function() {
+  gapi.client.load("drive", "v2", function() {
     loadFiles('root');
   });
 };

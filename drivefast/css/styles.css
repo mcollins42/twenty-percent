@@ -3,5 +3,6 @@
     font-family: sans-serif;
     margin: 5px;
     padding: 4px;
-    border: 2px lightgrey;
+    border-width: 5px;
+    border-style: ridge;
 }
