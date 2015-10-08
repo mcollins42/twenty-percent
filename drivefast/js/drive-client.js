@@ -5,7 +5,11 @@ function generateThumbnailUrl(file) {
 
 function getAlternateLink(file) {
   if (file.alternateLink) {
-    return '<a href="' + file.alternateLink + '"><span class="alt-link">alternate</span></a>';
+    if (file.mimeType.indexOf('application/vnd.google-apps.') == 0) {
+      return '<a href="' + file.alternateLink + '"><span class="alt-link">alternate</span></a>';
+    } else {
+      return '<span class="alt-preview" href= "' + file.alternateLink + '">preview</span>';
+    }
   } else {
     return '';
   }
@@ -44,6 +48,7 @@ function loadFiles(parentId) {
       for (var i = 0; i < response.items.length; i++) {
 	$('#file-grid').append(generateFileTile(response.items[i]));
       }
+      registerHandlers();
     } else {
       $('#log').append('<p>Failed to list files</p>');
     }
@@ -79,6 +84,18 @@ function authorize() {
   });
 };
 
+function registerHandlers() {
+  $('.alt-preview').click(function(e) {
+    var target = e.target;
+    var src = e.target.getAttribute('href');
+    $('#overlay-iframe').attr('src', src);
+    $('#overlay').toggleClass('shown');
+  });
+};
+
 $(document).ready(function() {
   authorize();
+  $('#overlay').click(function() {
+    $('#overlay').toggleClass('shown');
+  });
 });

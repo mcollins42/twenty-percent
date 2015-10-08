@@ -6,3 +6,15 @@
     border-width: 5px;
     border-style: ridge;
 }
+
+.overlay {
+    display: none;
+}
+
+.overlay.shown {
+    display: block;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+}
