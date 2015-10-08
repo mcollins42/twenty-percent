@@ -1,6 +1,6 @@
 function generateThumbnailUrl(file) {
   // gapi.auth.getToken()
-  return file.thumbnailLink;
+  return file.thumbnailLink + '-c';
 };
 
 function getAlternateLink(file) {
@@ -8,7 +8,8 @@ function getAlternateLink(file) {
     if (file.mimeType.indexOf('application/vnd.google-apps.') == 0) {
       return '<a href="' + file.alternateLink + '"><span class="alt-link">alternate</span></a>';
     } else {
-      return '<span class="alt-preview" href= "' + file.alternateLink + '">preview</span>';
+      var src = file.alternateLink.replace('/view?usp=drivesdk', '/preview');
+      return '<span class="alt-preview" href= "' + src + '">preview</span>';
     }
   } else {
     return '';
