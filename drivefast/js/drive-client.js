@@ -1,6 +1,10 @@
-function generateThumbnailUrl(file) {
-  // gapi.auth.getToken()
-  return file.thumbnailLink + '-c';
+function generateThumbnailUrl(file, size, crop) {
+  var options = '=s ' + (size || 220);
+  if (crop) {
+    options += '-' + crop;
+  }
+  return 'https://lh3.googleusercontent.com/d/' + file.id + options +
+      '?access_token=' + gapi.auth.getToken();
 };
 
 function getAlternateLink(file) {
@@ -16,6 +20,17 @@ function getAlternateLink(file) {
   }
 };
 
+function getPreviewLink(file) {
+  if (file.alternateLink) {
+    if (file.mimeType.indexOf('application/vnd.google-apps.') == 0) {
+      return '';
+    } else {
+      return file.alternateLink.replace('/view?usp=drivesdk', '/preview');
+    }
+  }
+  return '';
+};
+
 function getWebContentLink(file) {
   if (file.webContentLink) {
     return '<a href="' + file.webContentLink + '"><span class="content-link">web content</span></a>';
@@ -28,27 +43,42 @@ function generateFileTile(file) {
   return '<div class="file-tile" id="' + file.id + '"> ' +
     '<a href="https://drive.google.com/open?id=' + file.id +
     '" target="_blank">' +
-    '<img src="' + generateThumbnailUrl(file) + '"><br/>' +
+    '<img src="' + generateThumbnailUrl(file, 220, 'c') + '"><br/>' +
     '<span class="file-name">' + file.title + '</span></a>' +
     getAlternateLink(file) +
     getWebContentLink(file) +
     '</div>';
 };
 
+function generateFileListEntry(file) {
+  return '<div class="file-list-item" href="' + getPreviewLink(file) +
+    '" id="' + file.id + '"> ' +
+    '<span class="icon-holder"><img src="' + file.iconLink + '"></span>' +
+    '<a href="https://drive.google.com/open?id=' + file.id +
+    '" target="_blank">' +
+    '<span class="file-name">' + file.title + '</span></a>' +
+    '</div>';
+};
+
+function generateDetails(file) {
+  return '<div class="thumbnail"><img src="' +
+      generateThumbnailUrl(file, 400) + '"></div>';
+
 function loadFiles(parentId) {
   var request = gapi.client.drive.files.list({
     'q': "'" + parentId + "' in parents",
-    'fields': 'items(id,title,mimeType,lastViewedByMeDate,modifiedByMeDate,thumbnailLink,webContentLink,defaultOpenWithLink,alternateLink)'
+    'fields': 'items(id,iconLink,title,mimeType,lastViewedByMeDate,modifiedByMeDate,thumbnailLink,webContentLink,defaultOpenWithLink,alternateLink)'
   });
   request.execute(function(response) {
     if (response.items) {
       if (response.items.length == 0) {
-	$('#status').html('No items returned');
+	      $('#status').html('No items returned');
       }
-      $('#file-grid').html('');
+      var items = [];
       for (var i = 0; i < response.items.length; i++) {
-	$('#file-grid').append(generateFileTile(response.items[i]));
+	      items.push(generateFileListEntry(response.items[i]));
       }
+      $('#file-list').html(items.join(''));
       registerHandlers();
     } else {
       $('#log').append('<p>Failed to list files</p>');
@@ -86,7 +116,7 @@ function authorize() {
 };
 
 function registerHandlers() {
-  $('.alt-preview').click(function(e) {
+  $('.file-list-item').click(function(e) {
     var target = e.target;
     var src = e.target.getAttribute('href');
     $('#overlay-iframe').attr('src', src);
@@ -96,7 +126,7 @@ function registerHandlers() {
 
 $(document).ready(function() {
   authorize();
-  $('#overlay').click(function() {
+  $('#close').click(function() {
     $('#overlay').toggleClass('shown');
   });
 });
