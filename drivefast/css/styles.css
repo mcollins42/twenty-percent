@@ -7,7 +7,7 @@ html, body {
 }
 
 #file-list {
-  	position: absolute;
+    position: absolute;
     width: 200px;
     overflow-x: hidden;
     overflow-y: auto;
@@ -45,8 +45,8 @@ html, body {
 }
 
 #file-detail {
-  	position: relative;
-  	margin-left: 200px;
+    position: relative;
+    margin-left: 200px;
     height: 100vh;
 }
 
