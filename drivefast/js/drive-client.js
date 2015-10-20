@@ -1,10 +1,14 @@
+
+var fileMap = {};
+
 function generateThumbnailUrl(file, size, crop) {
-  var options = '=s ' + (size || 220);
+  var options = '=s' + (size || 220);
   if (crop) {
     options += '-' + crop;
   }
+  var accessToken = gapi.auth.getToken().access_token;
   return 'https://lh3.googleusercontent.com/d/' + file.id + options +
-      '?access_token=' + gapi.auth.getToken();
+      '?access_token=' + accessToken;
 };
 
 function getAlternateLink(file) {
@@ -51,8 +55,7 @@ function generateFileTile(file) {
 };
 
 function generateFileListEntry(file) {
-  return '<div class="file-list-item" href="' + getPreviewLink(file) +
-    '" id="' + file.id + '"> ' +
+  return '<div class="file-list-item" id="' + file.id + '"> ' +
     '<span class="icon-holder"><img src="' + file.iconLink + '"></span>' +
     '<a href="https://drive.google.com/open?id=' + file.id +
     '" target="_blank">' +
@@ -61,8 +64,14 @@ function generateFileListEntry(file) {
 };
 
 function generateDetails(file) {
-  return '<div class="thumbnail"><img src="' +
-      generateThumbnailUrl(file, 400) + '"></div>';
+  var thumb =
+    '<div class="thumbnail"><img src="' + generateThumbnailUrl(file, 400) + '"></div>';
+  var previewLink = getPreviewLink(file);
+  var preview = previewLink ?
+    '<div class="preview"><span class="preview-link" src="' + previewLink +
+    '">preview</span></div>' : '';
+  return thumb + preview;
+}
 
 function loadFiles(parentId) {
   var request = gapi.client.drive.files.list({
@@ -74,6 +83,8 @@ function loadFiles(parentId) {
       if (response.items.length == 0) {
 	      $('#status').html('No items returned');
       }
+      fileMap = new Map(response.items.map(function(file) { return [file.id, file]; }));
+
       var items = [];
       for (var i = 0; i < response.items.length; i++) {
 	      items.push(generateFileListEntry(response.items[i]));
@@ -117,8 +128,17 @@ function authorize() {
 
 function registerHandlers() {
   $('.file-list-item').click(function(e) {
+    var id = e.target.id;
+    var file = fileMap.get(id);
+    $('#details-content').html(generateDetails(file));
+    detailsHandlers();
+  });
+};
+
+function detailsHandlers() {
+  $('.preview-link').click(function(e) {
     var target = e.target;
-    var src = e.target.getAttribute('href');
+    var src = e.target.getAttribute('src');
     $('#overlay-iframe').attr('src', src);
     $('#overlay').toggleClass('shown');
   });
